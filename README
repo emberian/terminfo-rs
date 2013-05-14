@@ -1,0 +1,6 @@
+terminfo-rs
+===========
+
+A rust library for handling terminfo databases.
+
+License: MIT

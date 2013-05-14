@@ -1,0 +1,7 @@
+#[link(name = "terminfo", vers = "0.0.1", author = "cmr")];
+
+#[crate_type = "lib"];
+
+mod searcher;
+mod parser;
+
