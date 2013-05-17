@@ -1,4 +1,5 @@
 /// Implement ncurses-compatible database discovery
+/// Does not support hashed database, only filesystem!
 
 use core::os;
 use core::os::getenv;
