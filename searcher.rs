@@ -2,6 +2,7 @@
 
 use core::os::getenv;
 use core::str;
+use core::io::{file_reader, Reader};
 use path = core::path::PosixPath;
 
 /// Return path to database entry for `term`
@@ -41,6 +42,14 @@ pub fn get_dbpath_for_term(term: &str) -> Option<~path> {
     None
 }
 
+/// Return open file for `term`
+fn open(term: &str) -> Result<@Reader, ~str> {
+    match get_dbpath_for_term(term) {
+        Some(x) => file_reader(x),
+        None => Err(fmt!("could not find terminfo entry for %s", term))
+    }
+}
+
 #[test]
 fn test_get_dbpath_for_term() {
     // woefully inadequate test coverage
@@ -51,4 +60,11 @@ fn test_get_dbpath_for_term() {
     setenv("TERMINFO_DIRS", ":");
     assert!(x("screen") == ~"/usr/share/terminfo/s/screen");
     unsetenv("TERMINFO_DIRS");
+}
+
+#[test]
+fn test_open() {
+    open("screen");
+    let t = open("nonexistent terminal that hopefully does not exist");
+    assert!(t.is_err());
 }
