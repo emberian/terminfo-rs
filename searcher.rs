@@ -6,6 +6,10 @@ use path = core::path::PosixPath;
 
 /// Return path to database entry for `term`
 pub fn get_dbpath_for_term(term: &str) -> Option<~path> {
+    if term.len() == 0 {
+        return None;
+    }
+
     let mut dirs_to_search = ~[];
     let first_char = term.substr(0, 1);
 
@@ -40,6 +44,11 @@ pub fn get_dbpath_for_term(term: &str) -> Option<~path> {
 #[test]
 fn test_get_dbpath_for_term() {
     // woefully inadequate test coverage
-    use x = self::get_dbpath_for_term;
-    assert!(x("screen").unwrap().to_str() == ~"/usr/share/terminfo/s/screen");
+    use core::os::{setenv, unsetenv};
+    fn x(t: &str) -> ~str { get_dbpath_for_term(t).expect("no terminfo entry found").to_str() };
+    assert!(x("screen") == ~"/usr/share/terminfo/s/screen");
+    assert!(get_dbpath_for_term("") == None);
+    setenv("TERMINFO_DIRS", ":");
+    assert!(x("screen") == ~"/usr/share/terminfo/s/screen");
+    unsetenv("TERMINFO_DIRS");
 }
