@@ -1,5 +1,6 @@
 /// Implement ncurses-compatible database discovery
 
+use core::os;
 use core::os::getenv;
 use core::str;
 use core::io::{file_reader, Reader};
@@ -11,6 +12,8 @@ pub fn get_dbpath_for_term(term: &str) -> Option<~path> {
         return None;
     }
 
+    let homedir = os::homedir();
+
     let mut dirs_to_search = ~[];
     let first_char = term.substr(0, 1);
 
@@ -18,6 +21,9 @@ pub fn get_dbpath_for_term(term: &str) -> Option<~path> {
     match getenv(~"TERMINFO") {
         Some(dir) => dirs_to_search.push(path(dir)),
         None => {
+            if homedir.is_some() {
+                dirs_to_search.push(homedir.unwrap().push(".terminfo")); // ncurses compatability
+            }
             match getenv(~"TERMINFO_DIRS") {
                 Some(dirs) => for str::each_split_char(dirs, ':') |i| {
                     if i == ~"" {
