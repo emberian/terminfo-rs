@@ -2,6 +2,14 @@
 
 #[crate_type = "lib"];
 
-mod searcher;
-mod parser;
+use core::hashmap::HashMap;
 
+struct TermInfo {
+    names: ~[&str],
+    bools: HashMap<&str, bool>,
+    numbers: HashMap<&str, [u8, ..2]>,
+    strings: HashMap<&str, &str>
+}
+
+pub mod searcher;
+pub mod parser;
