@@ -2,6 +2,16 @@
 
 #[crate_type = "lib"];
 
-mod searcher;
-mod parser;
+use std::hashmap::HashMap;
 
+pub struct TermInfo {
+    names: ~[~str],
+    bools: HashMap<~str, bool>,
+    numbers: HashMap<~str, u16>,
+    strings: HashMap<~str, ~[u8]>
+}
+
+pub mod searcher;
+pub mod parser {
+    pub mod compiled;
+}

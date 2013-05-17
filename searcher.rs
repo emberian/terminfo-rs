@@ -1,11 +1,11 @@
 /// Implement ncurses-compatible database discovery
 /// Does not support hashed database, only filesystem!
 
-use core::os;
-use core::os::getenv;
-use core::str;
-use core::io::{file_reader, Reader};
-use path = core::path::PosixPath;
+use std::os;
+use std::os::getenv;
+use std::str;
+use std::io::{file_reader, Reader};
+use path = std::path::PosixPath;
 
 /// Return path to database entry for `term`
 pub fn get_dbpath_for_term(term: &str) -> Option<~path> {
@@ -19,22 +19,22 @@ pub fn get_dbpath_for_term(term: &str) -> Option<~path> {
     let first_char = term.substr(0, 1);
 
     // Find search directory
-    match getenv(~"TERMINFO") {
+    match getenv("TERMINFO") {
         Some(dir) => dirs_to_search.push(path(dir)),
         None => {
             if homedir.is_some() {
                 dirs_to_search.push(homedir.unwrap().push(".terminfo")); // ncurses compatability
             }
-            match getenv(~"TERMINFO_DIRS") {
+            match getenv("TERMINFO_DIRS") {
                 Some(dirs) => for str::each_split_char(dirs, ':') |i| {
                     if i == ~"" {
-                        dirs_to_search.push(path(~"/usr/share/terminfo"));
+                        dirs_to_search.push(path("/usr/share/terminfo"));
                     } else {
                         dirs_to_search.push(path(i.to_owned()));
                     }
                 },
                 // Found nothing, use the default path
-                None => dirs_to_search.push(path(~"/usr/share/terminfo"))
+                None => dirs_to_search.push(path("/usr/share/terminfo"))
             }
         }
     };
@@ -50,7 +50,7 @@ pub fn get_dbpath_for_term(term: &str) -> Option<~path> {
 }
 
 /// Return open file for `term`
-fn open(term: &str) -> Result<@Reader, ~str> {
+pub fn open(term: &str) -> Result<@Reader, ~str> {
     match get_dbpath_for_term(term) {
         Some(x) => file_reader(x),
         None => Err(fmt!("could not find terminfo entry for %s", term))
@@ -60,7 +60,7 @@ fn open(term: &str) -> Result<@Reader, ~str> {
 #[test]
 fn test_get_dbpath_for_term() {
     // woefully inadequate test coverage
-    use core::os::{setenv, unsetenv};
+    use std::os::{setenv, unsetenv};
     fn x(t: &str) -> ~str { get_dbpath_for_term(t).expect("no terminfo entry found").to_str() };
     assert!(x("screen") == ~"/usr/share/terminfo/s/screen");
     assert!(get_dbpath_for_term("") == None);
