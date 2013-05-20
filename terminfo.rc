@@ -4,12 +4,14 @@
 
 use core::hashmap::HashMap;
 
-struct TermInfo {
-    names: ~[&str],
-    bools: HashMap<&str, bool>,
-    numbers: HashMap<&str, [u8, ..2]>,
-    strings: HashMap<&str, &str>
+pub struct TermInfo {
+    names: ~[~str],
+    bools: HashMap<~str, bool>,
+    numbers: HashMap<~str, i16>,
+    strings: HashMap<~str, ~str>
 }
 
 pub mod searcher;
-pub mod parser;
+pub mod parser {
+    pub mod compiled;
+}
