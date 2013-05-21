@@ -139,7 +139,6 @@ pub static stringnames: &'static[&'static str] = &'static[ "cbt", "_", "cr", "cs
     "rmpch", "smsc", "rmsc", "pctrm", "scesc", "scesa", "ehhlm", "elhlm", "elohlm", "erhlm",
     "ethlm", "evhlm", "sgr1", "slength"];
 
-#[cfg(target_endian="little")]
 pub fn parse(file: @Reader, longnames: bool) -> Result<~TermInfo, ~str> {
     let bnames, snames, nnames;
 
@@ -171,6 +170,12 @@ pub fn parse(file: @Reader, longnames: bool) -> Result<~TermInfo, ~str> {
     assert!(string_offsets_count > 0);
     assert!(string_table_bytes   > 0);
 
+    debug!("names_bytes = %?", names_bytes);
+    debug!("bools_bytes = %?", bools_bytes);
+    debug!("numbers_count = %?", numbers_count);
+    debug!("string_offsets_count = %?", string_offsets_count);
+    debug!("string_table_bytes = %?", string_table_bytes);
+
     if (bools_bytes as uint) > boolnames.len() {
         error!("expected bools_bytes to be less than %? but found %?", boolnames.len(),
                bools_bytes);
@@ -195,37 +200,47 @@ pub fn parse(file: @Reader, longnames: bool) -> Result<~TermInfo, ~str> {
         term_names.push(s.to_owned());
     }
 
+    debug!("term names: %?", term_names);
+
     let mut bools_map = HashMap::new();
-    for int::range(0, bools_bytes) |i| {
+    for int::range(0, bools_bytes+1) |i| {
         let b = file.read_byte();
         if b < 0 {
             error!("EOF reading bools after %? entries", i);
             return Err(~"error: expected more bools but hit EOF");
-        } else {
-            debug!("%s set to %b", bnames[i], b as bool);
-            bools_map.insert(bnames[i].to_owned(), b as bool);
+        } else if b == 1 {
+            debug!("%s set", bnames[i]);
+            bools_map.insert(bnames[i].to_owned(), true);
         }
     }
 
+    debug!("bools: %?", bools_map);
+
     let mut numbers_map = HashMap::new();
-    for int::range(0, numbers_count) |i| {
+    for int::range(0, numbers_count+1) |i| {
         let n = file.read_le_i16();
-        if n != -1 {
+        if n as u16 != 0xFFFF {
             debug!("%s#%?", nnames[i], n);
+            assert!(n >= 0);
             numbers_map.insert(nnames[i].to_owned(), n);
         }
     }
+    
+    debug!("numbers: %?", numbers_map);
 
     let mut string_offsets: ~[i16] = vec::with_capacity(10);
-    for int::range(0, string_offsets_count) |_i| {
+    for int::range(0, string_offsets_count+1) |_i| {
         string_offsets.push(file.read_le_i16());
     }
 
+    debug!("offsets: %?", string_offsets);
+
     let string_table = file.read_bytes(string_table_bytes as uint);
 
-    error!(file.tell());
-    error!(file.eof());
-    
+    for string_table.each |&b| {
+        println(fmt!("%x", b as uint));
+    }
+
     if string_table.len() != string_table_bytes as uint {
         error!("EOF reading string table after %? bytes, wanted %?", string_table.len(),
                string_table_bytes);
@@ -239,6 +254,7 @@ pub fn parse(file: @Reader, longnames: bool) -> Result<~TermInfo, ~str> {
         if offset == -1 {
             loop;
         }
+        error!(i);
         error!(offset);
         error!(offset as uint);
         error!(string_table_bytes);
@@ -261,11 +277,6 @@ pub fn parse(file: @Reader, longnames: bool) -> Result<~TermInfo, ~str> {
 
     // And that's all there is to it
     Ok(~TermInfo {names: term_names, bools: bools_map, numbers: numbers_map, strings: string_map })
-}
-
-#[cfg(target_endian="big")]
-pub fn parse(file: @Reader, longnames: bool) -> Result<~TermInfo, ~str> {
-    fail!("Big endian platforms not yet supported");
 }
 
 #[cfg(test)]

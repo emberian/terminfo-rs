@@ -19,22 +19,22 @@ pub fn get_dbpath_for_term(term: &str) -> Option<~path> {
     let first_char = term.substr(0, 1);
 
     // Find search directory
-    match getenv(~"TERMINFO") {
+    match getenv("TERMINFO") {
         Some(dir) => dirs_to_search.push(path(dir)),
         None => {
             if homedir.is_some() {
                 dirs_to_search.push(homedir.unwrap().push(".terminfo")); // ncurses compatability
             }
-            match getenv(~"TERMINFO_DIRS") {
+            match getenv("TERMINFO_DIRS") {
                 Some(dirs) => for str::each_split_char(dirs, ':') |i| {
                     if i == ~"" {
-                        dirs_to_search.push(path(~"/usr/share/terminfo"));
+                        dirs_to_search.push(path("/usr/share/terminfo"));
                     } else {
                         dirs_to_search.push(path(i.to_owned()));
                     }
                 },
                 // Found nothing, use the default path
-                None => dirs_to_search.push(path(~"/usr/share/terminfo"))
+                None => dirs_to_search.push(path("/usr/share/terminfo"))
             }
         }
     };
