@@ -15,3 +15,4 @@ pub mod searcher;
 pub mod parser {
     pub mod compiled;
 }
+pub mod parm;

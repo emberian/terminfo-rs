@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-rustc --lib terminfo.rc
-rustc --test terminfo.rc
+rustc --lib terminfo.rc || exit
+rustc --test terminfo.rc || exit
 
-rustc -L . rcmp.rs
+rustc -L . tools/rcmp.rs || exit
+rustc -L . tools/dumpcaps.rs || exit
 
-./terminfo
-
-for term in $(find /usr/share/terminfo -type f | awk 'FS="/" { print $6 }'); do echo $term; ./rcmp $term; done
+if [ "$1" = "test" ]; then
+	./terminfo
+	for term in $(find /usr/share/terminfo -type f | awk 'FS="/" { print $6 }'); do echo $term; ./rcmp $term; done
+fi
