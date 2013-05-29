@@ -7,5 +7,5 @@ rustc -L . tools/dumpcaps.rs || exit
 
 if [ "$1" = "test" ]; then
 	./terminfo
-	for term in $(find /usr/share/terminfo -type f | awk 'FS="/" { print $6 }'); do echo $term; ./rcmp $term; done
+	for term in $(find /usr/share/terminfo -type f | awk 'FS="/" { print $6 }'); do echo $term; ./tools/rcmp $term; done
 fi

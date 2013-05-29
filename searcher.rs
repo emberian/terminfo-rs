@@ -27,7 +27,7 @@ pub fn get_dbpath_for_term(term: &str) -> Option<~path> {
             }
             match getenv("TERMINFO_DIRS") {
                 Some(dirs) => for str::each_split_char(dirs, ':') |i| {
-                    if i == ~"" {
+                    if i == "" {
                         dirs_to_search.push(path("/usr/share/terminfo"));
                     } else {
                         dirs_to_search.push(path(i.to_owned()));
